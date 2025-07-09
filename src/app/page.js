@@ -71,7 +71,7 @@ export default function Home() {
 
 			</div>
           
-          <form onSubmit={(e) => { e.preventDefault(); handleCheck(); }}>
+          <form autoComplete="off" onSubmit={(e) => { e.preventDefault(); handleCheck(); }}>
             <label htmlFor="marketValue" className="block text-white font-raleway text-lg font-semibold mb-2">
               Market Value
             </label>
