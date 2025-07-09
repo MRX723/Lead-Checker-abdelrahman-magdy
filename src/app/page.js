@@ -63,16 +63,16 @@ export default function Home() {
         <div className="bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg">
           <div className="flex flex-nowrap justify-center items-center gap-1 mb-10">
   
-			  <img src="/svgr.svg" alt="Lead Checker Icon" draggable="false" className="select-none w-20 h-20"/>
+			  <img src="/svgr.svg" draggable="false" className="select-none sm:w-20 sm:h-20 w-15 h-15"/>
 			  
-			  <h2 className="text-3xl whitespace-nowrap font-extrabold font-raleway text-white">
+			  <h2 className="sm:text-3xl text-xl whitespace-nowrap font-extrabold font-raleway text-white">
 				Lead Warmness Checker
 			  </h2>
 
 			</div>
           
           <form onSubmit={(e) => { e.preventDefault(); handleCheck(); }}>
-            <label htmlFor="marketValue" className="block text-white font-raleway text-md font-semibold mb-2">
+            <label htmlFor="marketValue" className="block text-white font-raleway text-lg font-semibold mb-2">
               Market Value
             </label>
             <input
@@ -80,10 +80,10 @@ export default function Home() {
               placeholder="e.g., 250000"
               value={marketValue}
               onChange={e => setMarketValue(e.target.value)}
-              className="font-raleway w-full bg-white p-3 mb-6 rounded-lg border-0 border-gray-300 text-md focus:outline-none"
+              className="text-lg placeholder-gray-400 font-semibold font-raleway w-full bg-white p-3 mb-6 rounded-lg border-0 border-gray-300 text-md focus:outline-none"
             />
 
-            <label htmlFor="askingPrice" className="block text-md text-white font-raleway font-semibold mb-2">
+            <label htmlFor="askingPrice" className="block text-lg text-white font-raleway font-semibold mb-2">
               Asking Price
             </label>
             <input
@@ -91,7 +91,7 @@ export default function Home() {
               placeholder="e.g., 180000"
               value={askingPrice}
               onChange={e => setAskingPrice(e.target.value)}
-              className="font-raleway w-full bg-white p-3 mb-9 rounded-lg border-0 border-gray-300 text-md focus:outline-none"
+              className="placeholder-gray-400 text-lg font-semibold font-raleway w-full bg-white p-3 mb-9 rounded-lg border-0 border-gray-300 text-md focus:outline-none"
             />
 
             <motion.button
@@ -99,7 +99,7 @@ export default function Home() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.90 }}
               transition={{type: "tween", duration: 0.11, ease: "easeOut"}}
-              className="font-raleway hover:cursor-pointer w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg"
+              className="font-raleway text-lg hover:cursor-pointer w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg"
             >
               Check
             </motion.button>
@@ -112,7 +112,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.70 }}
                 transition={{ duration: 0.2 }}
-                className="mt-8 p-4 font-semibold rounded-lg bg-gray-50 text-center text-md font-raleway"
+                className="mt-8 p-4 font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway"
                 style={{color: color }}
               >
                 {result}
