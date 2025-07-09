@@ -80,7 +80,7 @@ export default function Home() {
               placeholder="e.g., 250000"
               value={marketValue}
               onChange={e => setMarketValue(e.target.value)}
-              className="text-lg placeholder-gray-400 font-semibold font-raleway w-full bg-white p-3 mb-6 rounded-lg border-0 border-gray-300 text-md focus:outline-none"
+              className="text-lg text-black placeholder-gray-400 font-semibold font-raleway w-full bg-white p-3 mb-6 rounded-lg border-0 border-gray-300 focus:outline-none"
             />
 
             <label htmlFor="askingPrice" className="block text-lg text-white font-raleway font-semibold mb-2">
@@ -91,7 +91,7 @@ export default function Home() {
               placeholder="e.g., 180000"
               value={askingPrice}
               onChange={e => setAskingPrice(e.target.value)}
-              className="placeholder-gray-400 text-lg font-semibold font-raleway w-full bg-white p-3 mb-9 rounded-lg border-0 border-gray-300 text-md focus:outline-none"
+              className="placeholder-gray-400 text-black text-lg font-semibold font-raleway w-full bg-white p-3 mb-9 rounded-lg border-0 border-gray-300 focus:outline-none"
             />
 
             <motion.button
