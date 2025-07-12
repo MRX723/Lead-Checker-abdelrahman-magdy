@@ -2,34 +2,81 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BsWhatsapp } from 'react-icons/bs';
+import CurrencyInput from 'react-currency-input-field';
+
 export default function Home() {
-  const [marketValue, setMarketValue] = useState('');
-  const [askingPrice, setAskingPrice] = useState('');
+  const [marketValue, setMarketValue] = useState();
+  const [askingPrice, setAskingPrice] = useState();
   const [result, setResult] = useState('');
   const [color, setColor] = useState('');
   const [key, setKey] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  useEffect(() => {
+    // Create a new image object in memory
+    const img = new Image();
+
+    // Set the event handlers on this new object
+    img.onload = () => {
+      console.log('Image preloaded successfully!');
+      setIsImageLoaded(true);
+    };
+    img.onerror = () => {
+      console.error('Failed to preload image.');
+      // Show the page anyway, even if the image fails, to avoid a blank screen
+      setIsImageLoaded(true); 
+    };
+
+    // Setting the src a..fter the handlers are attached triggers the download
+    img.src = '/svgr.svg';
+
+  }, []);
+  const blockInvalidKeys = (event) => {
+    if (event.key === '-') {
+      event.preventDefault();
+    }
+  };
+  const showPage = (value) => {
+	  setIsImageLoaded(true);
+  };
+  const handleMarketValueChange = (value) => {
+	console.log(value)
+	console.log(marketValue)
+    if (value === marketValue) {
+      return;
+    }
+ 
+    setMarketValue(value);
+    setResult('');
+  };
+  
+  const handleAskingPriceChange = (value) => {
+    if (value === askingPrice) {
+      return;
+    }
+ 
+    setAskingPrice(value);
+    setResult('');
+  };
 
   const handleCheck = () => {
-    setResult('');
-    setKey(prev => prev + 1);
+    console.log("handlecheck was called")
 
-    setTimeout(() => {
-      // Reverted to your original variable assignments
+    setTimeout( () => {
       const mv = marketValue;
       const asking = askingPrice;
 
       if (
         isNaN(mv) ||
         isNaN(asking) ||
-        marketValue.trim() === '' ||
-        askingPrice.trim() === '' ||
-        mv === 0
+        mv.trim() === '' ||
+        asking.trim() === '' ||
+        mv === '0' || mv < 0 || asking < 0
       ) {
         setResult('Invalid input ❌');
         setColor('black');
         return;
       }
-      // Kept your original lines here
+
 	  parseFloat(mv);
 	  parseFloat(asking);
 
@@ -52,6 +99,10 @@ export default function Home() {
         setColor('black');
       }
     }, 50);
+
+
+
+
   };
 
   return (
@@ -59,68 +110,116 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-[radial-gradient(at_right_bottom,_#CA1111,_#692694)]">
 
       {/* Main content area grows to push the footer down */}
-      <main className="flex-grow flex items-center justify-center p-4">
-        <div className="bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg">
-          <div className="flex flex-nowrap justify-center items-center gap-1 mb-10">
+      
+	  
+	  <motion.main layout className="flex-grow flex items-center justify-center p-4">
+        <AnimatePresence type="wait">
+		<motion.div initial={{y: 50}} animate={{y: 0}} layout transition={{  type: "spring",
+    stiffness: 50,
+    damping: 5  }} className={`bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg transition-opacity duration-2000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}>
+          <motion.div layout className="flex flex-nowrap justify-center items-center gap-1 mb-10">
   
-			  <img src="/svgr.svg" draggable="false" className="select-none sm:w-20 sm:h-20 w-15 h-15"/>
+			  <img src="/svgr.svg" draggable="false" className="select-none sm:w-20 sm:h-20 w-15 h-15" />
 			  
 			  <h2 className="sm:text-3xl text-xl whitespace-nowrap font-extrabold font-raleway text-white">
 				Lead Warmness Checker
 			  </h2>
 
-			</div>
+			</motion.div>
           
-          <form autoComplete="off" onSubmit={(e) => { e.preventDefault(); handleCheck(); }}>
+          <motion.form layout autoComplete="off" onSubmit={(e) => { e.preventDefault();   if (result) {
+setResult()
+
+setTimeout( () => { handleCheck(); setKey(prev => prev + 1);    }, 200)    
+
+    console.log("delay"); // delay in ms (match your exit animation duration)
+  } else {
+    console.log("no delay");
+    handleCheck();
+  }; }}>
             <label htmlFor="marketValue" className="block text-white font-raleway text-lg font-semibold mb-2">
               Market Value
             </label>
-            <input
+            <CurrencyInput
               type="text"
               placeholder="e.g., 250000"
+			  defaultValue={marketValue}
               value={marketValue}
-              onChange={e => setMarketValue(e.target.value)}
+			  disableAbbreviations = "true"
+			  allowNegativeValue = {false}
+              onValueChange={ handleMarketValueChange}
+			  onKeyDown= {blockInvalidKeys}
               className="text-lg text-black placeholder-gray-400 font-semibold font-raleway w-full bg-white p-3 mb-6 rounded-lg border-0 border-gray-300 focus:outline-none"
             />
 
             <label htmlFor="askingPrice" className="block text-lg text-white font-raleway font-semibold mb-2">
               Asking Price
             </label>
-            <input
+
+            <CurrencyInput
               type="text"
               placeholder="e.g., 180000"
+			  defaultValue={askingPrice}
               value={askingPrice}
-              onChange={e => setAskingPrice(e.target.value)}
+			  disableAbbreviations = "true"
+			  allowNegativeValue = {false}
+              onValueChange ={ handleAskingPriceChange }
+			  onKeyDown= {blockInvalidKeys}
               className="placeholder-gray-400 text-black text-lg font-semibold font-raleway w-full bg-white p-3 mb-9 rounded-lg border-0 border-gray-300 focus:outline-none"
             />
 
             <motion.button
-              onClick={handleCheck}
               whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.90 }}
-              transition={{type: "tween", duration: 0.11, ease: "easeOut"}}
-              className="font-raleway text-lg hover:cursor-pointer w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg"
+              whileTap={{ scale: 0.95 }}
+			  animate={{ paddingTop: 14 , paddingBottom: 14 }}
+              transition={{duration: 0.3}}
+              className="font-raleway text-lg hover:cursor-pointer w-full bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg"
             >
               Check
             </motion.button>
-          </form>
-          <AnimatePresence mode="wait">
-            {result && (
-              <motion.div
-                key={key}
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.70 }}
-                transition={{ duration: 0.2 }}
-                className="mt-8 p-4 font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway"
-                style={{color: color }}
-              >
-                {result}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </main>
+          </motion.form>
+		  
+		 
+
+
+
+  <AnimatePresence mode="wait">
+    {result && (
+      <motion.div
+        key={key}
+        initial={{ marginTop: 0, paddingTop: 0 , paddingBottom: 0,  opacity: 0,scale: 1 }}
+        animate={{ marginTop: 30, paddingTop: 14 , paddingBottom: 14, opacity: 1, scale: 1 }}
+        exit={{
+          opacity: 0,
+          y: -10,
+          scale: 0.7,
+          height: 0,
+          marginTop: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
+		  transition: { 
+          type: "tween",
+          duration: 0.1, 
+          ease: "easeOut" }
+        }}
+        transition={{  type: "tween",
+          duration: 0.2, 
+          ease: "easeIn"  }}
+        className="font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway"
+        style={{ color: color }}
+      >
+        {result}
+      </motion.div>
+    )}
+  </AnimatePresence>
+
+
+
+
+        
+		</motion.div>
+    </AnimatePresence>
+	</motion.main>
 
       {/* The new footer element */}
 <footer className="w-full text-center p-5 text-white font-raleway text-sm shadow-md flex justify-center items-center gap-2">
