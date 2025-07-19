@@ -11,108 +11,78 @@ export default function Home() {
   const [color, setColor] = useState('');
   const [key, setKey] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+
   useEffect(() => {
-    // Create a new image object in memory
     const img = new Image();
-
-    // Set the event handlers on this new object
-    img.onload = () => {
-      console.log('Image preloaded successfully!');
-      setIsImageLoaded(true);
-    };
-    img.onerror = () => {
-      console.error('Failed to preload image.');
-      // Show the page anyway, even if the image fails, to avoid a blank screen
-      setIsImageLoaded(true); 
-    };
-
-    // Setting the src a..fter the handlers are attached triggers the download
+    img.onload = () => setIsImageLoaded(true);
+    img.onerror = () => setIsImageLoaded(true);
     img.src = '/svgr.svg';
-
   }, []);
-  
-  const variants = { 
-  
-  initial:{z: 1, rotation: 0.02, marginTop: 0, paddingTop: 0, paddingBottom: 0, opacity: 0, scale: 0.7 },
-  animate:{ 
-    rotation: 0.02,
-    z: 1, 
-    marginTop: 30, 
-    paddingTop: 14, 
-    paddingBottom: 14, 
-    opacity: 1, 
-    scale: 1, willChange: 'contents'
-  }, 
-  exit:{
-	z: 1,
-    opacity: 0,
-    y: -10,
-    scale: 0.7,
-    height: 0,
-    marginTop: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-    transition: { 
-      type: "tween",
-      duration: 0.1, 
-      ease: "easeOut" 
+
+  // --- REFINED VARIANTS FOR SMOOTH ANIMATION ---
+  const variants = {
+    initial: {
+      opacity: 0,
+      scale: 0.8,
+      y: -20, // Start slightly above its final position
+      height: 0, // Keep height 0 initially to prevent layout jumps
+      marginTop: 0,
+    },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      y: 0, // Animate to its natural position
+      height: 'auto', // Let content determine height
+      marginTop: 30, // Apply margin instantly
+      transition: {
+        // Use a spring for a more natural feel, or keep your tween
+        type: "spring",
+        stiffness: 300,
+        damping: 25,
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.8,
+      y: -10, // Animate slightly up on exit
+      height: 0, // Animate height to 0 for collapse effect
+      marginTop: 0,
+      transition: {
+        type: "tween",
+        duration: 0.15,
+        ease: "easeOut"
+      }
     }
-  }, 
-  transition:{  
-    type: "tween",
-    duration: 0.2, 
-    ease: "easeIn"  
-  } };
+  };
   
   const blockInvalidKeys = (event) => {
     if (event.key === '-') {
       event.preventDefault();
     }
   };
-  const showPage = (value) => {
-	  setIsImageLoaded(true);
-  };
+
   const handleMarketValueChange = (value) => {
-	console.log(value)
-	console.log(marketValue)
-    if (value === marketValue) {
-      return;
-    }
- 
     setMarketValue(value);
     setResult('');
   };
   
   const handleAskingPriceChange = (value) => {
-    if (value === askingPrice) {
-      return;
-    }
- 
     setAskingPrice(value);
     setResult('');
   };
 
   const handleCheck = () => {
-    console.log("handlecheck was called")
+    // Adding a tiny delay to allow the state update to batch
+    setTimeout(() => {
+      // Use parsed values directly for calculation
+      const mv = parseFloat(marketValue);
+      const asking = parseFloat(askingPrice);
 
-    setTimeout( () => {
-      const mv = marketValue;
-      const asking = askingPrice;
-
-      if (
-        isNaN(mv) ||
-        isNaN(asking) ||
-        mv.trim() === '' ||
-        asking.trim() === '' ||
-        mv === '0' || mv < 0 || asking < 0
-      ) {
+      if (isNaN(mv) || isNaN(asking) || mv <= 0 || asking < 0) {
         setResult('Invalid input ❌');
         setColor('black');
         return;
       }
-
-	  parseFloat(mv);
-	  parseFloat(asking);
 
       const percentage = (asking / mv) * 100;
 
@@ -132,131 +102,105 @@ export default function Home() {
         setResult('This is not a lead 🤡');
         setColor('black');
       }
-    }, 50);
+    }, 10); // A very short delay can sometimes help
+  };
 
-
-
-
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (result) {
+      setResult(''); // Trigger exit animation
+      // Wait for exit animation to finish before re-checking
+      setTimeout(() => {
+        setKey(prev => prev + 1);
+        handleCheck();
+      }, 200); // Match your exit animation duration
+    } else {
+      handleCheck();
+    }
   };
 
   return (
-    // The layout is changed to a flex column to accommodate the footer
     <div className="min-h-screen flex flex-col bg-[radial-gradient(at_right_bottom,_#CA1111,_#692694)]">
-
-      {/* Main content area grows to push the footer down */}
-      
-	  
-	  <main className="flex-grow flex items-center justify-center p-4">
-       
-		<motion.div initial={{y: 50}} animate={{z: 1, y: 0}} layout transition={{  type: "tween" }} className={`bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg transition-opacity duration-2000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}>
+      <main className="flex-grow flex items-center justify-center p-4">
+        <motion.div 
+          initial={{ y: 50, opacity: 0 }} 
+          animate={{ y: 0, opacity: 1 }} 
+          layout 
+          transition={{ type: "tween", duration: 0.5 }} 
+          className={`bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg transition-opacity duration-1000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+        >
           <motion.div layout className="flex flex-nowrap justify-center items-center gap-1 mb-10">
-  
-			  <img src="/svgr.svg" draggable="false" className="select-none sm:w-20 sm:h-20 w-15 h-15" />
-			  
-			  <h2 className="sm:text-3xl text-xl whitespace-nowrap font-extrabold font-raleway text-white">
-				Lead Warmness Checker
-			  </h2>
-
-			</motion.div>
+            <img src="/svgr.svg" draggable="false" className="select-none sm:w-20 sm:h-20 w-15 h-15" alt="Logo" />
+            <h2 className="sm:text-3xl text-xl whitespace-nowrap font-extrabold font-raleway text-white">
+              Lead Warmness Checker
+            </h2>
+          </motion.div>
           
-          <motion.form animate={{z: 1}} layout autoComplete="off" onSubmit={(e) => { e.preventDefault();   if (result) {
-setResult()
-
-setTimeout( () => { handleCheck(); setKey(prev => prev + 1);    }, 200)    
-
-    console.log("delay"); // delay in ms (match your exit animation duration)
-  } else {
-    console.log("no delay");
-    handleCheck();
-  }; }}>
+          <motion.form layout autoComplete="off" onSubmit={handleSubmit}>
             <label htmlFor="marketValue" className="block text-white font-raleway text-lg font-semibold mb-2">
               Market Value
             </label>
             <CurrencyInput
-              type="text"
+              id="marketValue"
               placeholder="e.g., 250000"
-			  defaultValue={marketValue}
               value={marketValue}
-			  disableAbbreviations = "true"
-			  allowNegativeValue = {false}
-			  prefix="$"
-              onValueChange={ handleMarketValueChange}
-			  onKeyDown= {blockInvalidKeys}
-              className="text-lg text-black placeholder-gray-400 font-semibold font-raleway w-full bg-white p-3 mb-6 rounded-lg border-0 border-gray-300 focus:outline-none"
+              disableAbbreviations={true}
+              allowNegativeValue={false}
+              prefix="$"
+              onValueChange={handleMarketValueChange}
+              onKeyDown={blockInvalidKeys}
+              className="text-lg text-black placeholder-gray-400 font-semibold font-raleway w-full bg-white p-3 mb-6 rounded-lg border-0 focus:outline-none"
             />
 
             <label htmlFor="askingPrice" className="block text-lg text-white font-raleway font-semibold mb-2">
               Asking Price
             </label>
-
             <CurrencyInput
-              type="text"
+              id="askingPrice"
               placeholder="e.g., 180000"
-			  defaultValue={askingPrice}
               value={askingPrice}
-			  disableAbbreviations = "true"
-			  allowNegativeValue = {false}
-			  prefix="$"
-              onValueChange ={ handleAskingPriceChange }
-			  onKeyDown= {blockInvalidKeys}
-              className="placeholder-gray-400 text-black text-lg font-semibold font-raleway w-full bg-white p-3 mb-9 rounded-lg border-0 border-gray-300 focus:outline-none"
+              disableAbbreviations={true}
+              allowNegativeValue={false}
+              prefix="$"
+              onValueChange={handleAskingPriceChange}
+              onKeyDown={blockInvalidKeys}
+              className="placeholder-gray-400 text-black text-lg font-semibold font-raleway w-full bg-white p-3 mb-9 rounded-lg border-0 focus:outline-none"
             />
 
             <motion.button
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-			  animate={{ z: 1, paddingTop: 14 , paddingBottom: 14 }}
-              transition={{duration: 0.3}}
-              className="font-raleway text-lg hover:cursor-pointer w-full bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg"
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              className="font-raleway text-lg py-3.5 hover:cursor-pointer w-full bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg"
             >
               Check
             </motion.button>
           </motion.form>
-		  
-		 
+  
+          <AnimatePresence mode="wait">
+            {result && (
+              <motion.div
+                key={key}
+                variants={variants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway p-3.5 overflow-hidden" // Add overflow-hidden
+                style={{ color: color }}
+              >
+                <p>{result}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </main>
 
-
-
-  <AnimatePresence mode="wait">
-    {result && (
-      <motion.div
-  key={key}
-  variants={variants}
-    initial="initial"
-    animate="animate"
-    exit="exit"
-    transition="transition"
-	
-  className="font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway"
-  style={{ color: color }}
->
-        <motion.p animate={{rotation: 0.02, z: 1, willChange: 'contents'}} >{result}</motion.p>
-      </motion.div>
-    )}
-  </AnimatePresence>
-
-
-
-
-        
-		</motion.div>
-	</main>
-
-      {/* The new footer element */}
-<footer className="w-full text-center p-5 text-white font-raleway text-sm shadow-md flex justify-center items-center gap-2">
-  <span>
-    Developed by <strong>Abdelrahman Magdy</strong>
-  </span>
-  <a
-    href="https://wa.me/201555911186"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex items-center gap-1 text-white hover:text-green-400 transition-colors duration-200"
-  >
-    <BsWhatsapp />
-  </a>
-</footer>
-
+      <footer className="w-full text-center p-5 text-white font-raleway text-sm shadow-md flex justify-center items-center gap-2">
+        <span>Developed by <strong>Abdelrahman Magdy</strong></span>
+        <a href="https://wa.me/201555911186" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-white hover:text-green-400 transition-colors duration-200">
+          <BsWhatsapp />
+        </a>
+      </footer>
     </div>
   );
 }
