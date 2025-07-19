@@ -148,9 +148,7 @@ export default function Home() {
 	  
 	  <main className="flex-grow flex items-center justify-center p-4">
        
-		<motion.div initial={{y: 50}} animate={{z: 1, y: 0}} layout transition={{  type: "spring",
-    stiffness: 50,
-    damping: 5  }} className={`bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg transition-opacity duration-2000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}>
+		<motion.div initial={{y: 50}} animate={{z: 1, y: 0}} layout transition={{  type: "tween" }} className={`bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg transition-opacity duration-2000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}>
           <motion.div layout className="flex flex-nowrap justify-center items-center gap-1 mb-10">
   
 			  <img src="/svgr.svg" draggable="false" className="select-none sm:w-20 sm:h-20 w-15 h-15" />
