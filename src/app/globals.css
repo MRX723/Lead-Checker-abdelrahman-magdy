@@ -9,7 +9,17 @@
   --foreground: #171717;
 }
 
+.stabilize-text {
+  /* A more direct hint to the browser to prepare for animation */
+  will-change: transform;
 
+  /* Another method to force the element onto its own GPU layer */
+  transform: translateZ(0);
+
+  /* Specific instructions for browsers on how to render the font smoothly */
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 @media (prefers-color-scheme: dark) {
   :root {

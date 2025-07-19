@@ -30,6 +30,40 @@ export default function Home() {
     img.src = '/svgr.svg';
 
   }, []);
+  
+  const variants = { 
+  
+  initial:{z: 1, rotation: 0.02, marginTop: 0, paddingTop: 0, paddingBottom: 0, opacity: 0, scale: 0.7 },
+  animate:{ 
+    rotation: 0.02,
+    z: 1, 
+    marginTop: 30, 
+    paddingTop: 14, 
+    paddingBottom: 14, 
+    opacity: 1, 
+    scale: 1, willChange: 'contents'
+  }, 
+  exit:{
+	z: 1,
+    opacity: 0,
+    y: -10,
+    scale: 0.7,
+    height: 0,
+    marginTop: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    transition: { 
+      type: "tween",
+      duration: 0.1, 
+      ease: "easeOut" 
+    }
+  }, 
+  transition:{  
+    type: "tween",
+    duration: 0.2, 
+    ease: "easeIn"  
+  } };
+  
   const blockInvalidKeys = (event) => {
     if (event.key === '-') {
       event.preventDefault();
@@ -112,9 +146,9 @@ export default function Home() {
       {/* Main content area grows to push the footer down */}
       
 	  
-	  <motion.main layout className="flex-grow flex items-center justify-center p-4">
-        <AnimatePresence type="wait">
-		<motion.div initial={{y: 50}} animate={{y: 0}} layout transition={{  type: "spring",
+	  <main className="flex-grow flex items-center justify-center p-4">
+       
+		<motion.div initial={{y: 50}} animate={{z: 1, y: 0}} layout transition={{  type: "spring",
     stiffness: 50,
     damping: 5  }} className={`bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg transition-opacity duration-2000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}>
           <motion.div layout className="flex flex-nowrap justify-center items-center gap-1 mb-10">
@@ -127,7 +161,7 @@ export default function Home() {
 
 			</motion.div>
           
-          <motion.form layout autoComplete="off" onSubmit={(e) => { e.preventDefault();   if (result) {
+          <motion.form animate={{z: 1}} layout autoComplete="off" onSubmit={(e) => { e.preventDefault();   if (result) {
 setResult()
 
 setTimeout( () => { handleCheck(); setKey(prev => prev + 1);    }, 200)    
@@ -147,6 +181,7 @@ setTimeout( () => { handleCheck(); setKey(prev => prev + 1);    }, 200)
               value={marketValue}
 			  disableAbbreviations = "true"
 			  allowNegativeValue = {false}
+			  prefix="$"
               onValueChange={ handleMarketValueChange}
 			  onKeyDown= {blockInvalidKeys}
               className="text-lg text-black placeholder-gray-400 font-semibold font-raleway w-full bg-white p-3 mb-6 rounded-lg border-0 border-gray-300 focus:outline-none"
@@ -163,6 +198,7 @@ setTimeout( () => { handleCheck(); setKey(prev => prev + 1);    }, 200)
               value={askingPrice}
 			  disableAbbreviations = "true"
 			  allowNegativeValue = {false}
+			  prefix="$"
               onValueChange ={ handleAskingPriceChange }
 			  onKeyDown= {blockInvalidKeys}
               className="placeholder-gray-400 text-black text-lg font-semibold font-raleway w-full bg-white p-3 mb-9 rounded-lg border-0 border-gray-300 focus:outline-none"
@@ -171,7 +207,7 @@ setTimeout( () => { handleCheck(); setKey(prev => prev + 1);    }, 200)
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-			  animate={{ paddingTop: 14 , paddingBottom: 14 }}
+			  animate={{ z: 1, paddingTop: 14 , paddingBottom: 14 }}
               transition={{duration: 0.3}}
               className="font-raleway text-lg hover:cursor-pointer w-full bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg"
             >
@@ -186,29 +222,17 @@ setTimeout( () => { handleCheck(); setKey(prev => prev + 1);    }, 200)
   <AnimatePresence mode="wait">
     {result && (
       <motion.div
-        key={key}
-        initial={{ marginTop: 0, paddingTop: 0 , paddingBottom: 0,  opacity: 0,scale: 1 }}
-        animate={{ marginTop: 30, paddingTop: 14 , paddingBottom: 14, opacity: 1, scale: 1 }}
-        exit={{
-          opacity: 0,
-          y: -10,
-          scale: 0.7,
-          height: 0,
-          marginTop: 0,
-          paddingTop: 0,
-          paddingBottom: 0,
-		  transition: { 
-          type: "tween",
-          duration: 0.1, 
-          ease: "easeOut" }
-        }}
-        transition={{  type: "tween",
-          duration: 0.2, 
-          ease: "easeIn"  }}
-        className="font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway"
-        style={{ color: color }}
-      >
-        {result}
+  key={key}
+  variants={variants}
+    initial="initial"
+    animate="animate"
+    exit="exit"
+    transition="transition"
+	
+  className="font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway"
+  style={{ color: color }}
+>
+        <motion.p animate={{rotation: 0.02, z: 1, willChange: 'contents'}} >{result}</motion.p>
       </motion.div>
     )}
   </AnimatePresence>
@@ -218,8 +242,7 @@ setTimeout( () => { handleCheck(); setKey(prev => prev + 1);    }, 200)
 
         
 		</motion.div>
-    </AnimatePresence>
-	</motion.main>
+	</main>
 
       {/* The new footer element */}
 <footer className="w-full text-center p-5 text-white font-raleway text-sm shadow-md flex justify-center items-center gap-2">
