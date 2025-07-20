@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef  } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BsWhatsapp } from 'react-icons/bs';
 import CurrencyInput from 'react-currency-input-field';
@@ -11,7 +11,9 @@ export default function Home() {
   const [color, setColor] = useState('');
   const [key, setKey] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-
+  const [isCoolingDown, setIsCoolingDown] = useState(false);
+  const resultRef = useRef(null); 
+  
   useEffect(() => {
     const img = new Image();
     img.onload = () => setIsImageLoaded(true);
@@ -19,112 +21,109 @@ export default function Home() {
     img.src = '/svgr.svg';
   }, []);
 
-  // --- REFINED VARIANTS FOR SMOOTH ANIMATION ---
-  const variants = {
-    initial: {
-      opacity: 0,
-      scale: 0.8,
-      y: -20, // Start slightly above its final position
-      height: 0, // Keep height 0 initially to prevent layout jumps
-      marginTop: 0,
-    },
-    animate: {
-      opacity: 1,
-      scale: 1,
-      y: 0, // Animate to its natural position
-      height: 'auto', // Let content determine height
-      marginTop: 30, // Apply margin instantly
-      transition: {
-        // Use a spring for a more natural feel, or keep your tween
-        type: "spring",
-        stiffness: 300,
-        damping: 25,
-      }
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.8,
-      y: -10, // Animate slightly up on exit
-      height: 0, // Animate height to 0 for collapse effect
-      marginTop: 0,
-      transition: {
-        type: "tween",
-        duration: 0.15,
-        ease: "easeOut"
-      }
+  useEffect(() => {
+    if (result && resultRef.current) {
+      const timeout = setTimeout(() => {
+        resultRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }, 100); // Slightly more than animation duration
+
+      return () => clearTimeout(timeout);
     }
+  }, [result]);
+  
+  const containerVariants = {
+    initial: { opacity: 0, scaleY: 0, y: -10 },
+    animate: { z:1, opacity: 1, scaleY: 1, y: 0, marginTop: 30, transition: { type: "tween", duration: 0.3 }},
+    exit: { opacity: 0, scaleY: 0, padding: 0, y: -10, height:0, marginTop: 0, transition: { type: "tween", duration: 0.2, ease: "easeOut" }}
   };
   
+  const contentVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { delay: 0.2, duration: 0.3 }},
+    exit: { opacity: 0, transition: { duration: 0.1 }}
+  };
+
   const blockInvalidKeys = (event) => {
-    if (event.key === '-') {
-      event.preventDefault();
-    }
+    if (event.key === '-') event.preventDefault();
   };
 
   const handleMarketValueChange = (value) => {
+	console.log(value)
+	console.log(marketValue)
+    if (value === marketValue) {return;}
     setMarketValue(value);
     setResult('');
   };
-  
+
   const handleAskingPriceChange = (value) => {
+
+
+    if (value === askingPrice) {return;}
+
     setAskingPrice(value);
     setResult('');
+
   };
 
   const handleCheck = () => {
-    // Adding a tiny delay to allow the state update to batch
-    setTimeout(() => {
-      // Use parsed values directly for calculation
-      const mv = parseFloat(marketValue);
-      const asking = parseFloat(askingPrice);
+    const mv = parseFloat(marketValue);
+    const asking = parseFloat(askingPrice);
 
-      if (isNaN(mv) || isNaN(asking) || mv <= 0 || asking < 0) {
-        setResult('Invalid input ❌');
-        setColor('black');
-        return;
-      }
+    if (isNaN(mv) || isNaN(asking) || mv <= 0 || asking < 0) {
+      setResult('Invalid input ❌');
+      setColor('black');
+      return;
+    }
 
-      const percentage = (asking / mv) * 100;
-
-      if (percentage <= 60) {
-        setResult('This price is HOT and over-rules motivation 🥵');
-        setColor('red');
-      } else if (percentage <= 70) {
-        setResult('This price is HOT 🔥');
-        setColor('red');
-      } else if (percentage <= 95) {
-        setResult('This price is WARM 🌡️');
-        setColor('#DE3163');
-      } else if (percentage <= 115) {
-        setResult('This price is COLD 🥶');
-        setColor('blue');
-      } else {
-        setResult('This is not a lead 🤡');
-        setColor('black');
-      }
-    }, 10); // A very short delay can sometimes help
+    const percentage = (asking / mv) * 100;
+    if (percentage <= 60) {
+      setResult('This price is HOT and over-rules motivation 🥵');
+      setColor('red');
+    } else if (percentage <= 70) {
+      setResult('This price is HOT 🔥');
+      setColor('red');
+    } else if (percentage <= 95) {
+      setResult('This price is WARM 🌡️');
+      setColor('#DE3163');
+    } else if (percentage <= 115) {
+      setResult('This price is COLD 🥶');
+      setColor('blue');
+    } else {
+      setResult('This is not a lead 🤡');
+      setColor('black');
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (isCoolingDown) return;
+
     if (result) {
-      setResult(''); // Trigger exit animation
-      // Wait for exit animation to finish before re-checking
+      setResult('');
       setTimeout(() => {
-        setKey(prev => prev + 1);
         handleCheck();
-      }, 200); // Match your exit animation duration
+        setKey(prev => prev + 1);
+      }, 300);
     } else {
       handleCheck();
     }
+   
+    setIsCoolingDown(true);
+    setTimeout(() => {
+      setIsCoolingDown(false);
+    }, 400);
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-[radial-gradient(at_right_bottom,_#CA1111,_#692694)]">
       <main className="flex-grow flex items-center justify-center p-4">
         <motion.div 
-          initial={{ y: 50, opacity: 0 }} 
-          animate={{ y: 0, opacity: 1 }} 
+          initial={{ y: 50 }} 
+          animate={{z:1, y: 0 }} 
           layout 
           transition={{ type: "tween", duration: 0.5 }} 
           className={`bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg transition-opacity duration-1000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
@@ -136,7 +135,7 @@ export default function Home() {
             </h2>
           </motion.div>
           
-          <motion.form layout autoComplete="off" onSubmit={handleSubmit}>
+         <motion.form layout autoComplete="off" onSubmit={handleSubmit}>
             <label htmlFor="marketValue" className="block text-white font-raleway text-lg font-semibold mb-2">
               Market Value
             </label>
@@ -168,12 +167,14 @@ export default function Home() {
             />
 
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              type="submit"
+              disabled={isCoolingDown}
+              whileHover={isCoolingDown ? {} : { scale: 1.05 }}
+              whileTap={isCoolingDown ? {} : { scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              className="font-raleway text-lg py-3.5 hover:cursor-pointer w-full bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg"
+              className="font-raleway text-lg py-3.5 w-full bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg disabled:bg-blue-700"
             >
-              Check
+              {isCoolingDown ? 'Checking...' : 'Check'}
             </motion.button>
           </motion.form>
   
@@ -181,14 +182,22 @@ export default function Home() {
             {result && (
               <motion.div
                 key={key}
-                variants={variants}
+				ref={resultRef}
+                variants={containerVariants}
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway p-3.5 overflow-hidden" // Add overflow-hidden
-                style={{ color: color }}
+                className="font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway p-3.5"
+                style={{ color: color, transformOrigin: 'bottom' }}
               >
-                <p>{result}</p>
+                <motion.p
+                  variants={contentVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                    {result}
+                </motion.p>
               </motion.div>
             )}
           </AnimatePresence>
