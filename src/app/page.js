@@ -13,7 +13,7 @@ export default function Home() {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isCoolingDown, setIsCoolingDown] = useState(false);
   const resultRef = useRef(null); 
-  
+  const isMobile = useIsMobile();
   useEffect(() => {
     const img = new Image();
     img.onload = () => setIsImageLoaded(true);
@@ -34,11 +34,30 @@ export default function Home() {
     }
   }, [result]);
   
-  const containerVariants = {
+  function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => setIsMobile(window.innerWidth <= breakpoint);
+    checkScreen();
+    window.addEventListener('resize', checkScreen);
+    return () => window.removeEventListener('resize', checkScreen);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+  
+  const desktopVariants = {
     initial: { opacity: 0, scaleY: 0, y: -10 },
     animate: { z:1, opacity: 1, scaleY: 1, y: 0, marginTop: 30, transition: { type: "tween", duration: 0.3 }},
     exit: { opacity: 0, scaleY: 0, padding: 0, y: -10, height:0, marginTop: 0, transition: { type: "tween", duration: 0.2, ease: "easeOut" }}
   };
+  
+  const mobileVariants = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  exit: { marginTop: 0, padding: 0, height:0, opacity: 0, y: 10, transition: { duration: 0.2 } },
+};
   
   const contentVariants = {
     initial: { opacity: 0 },
@@ -126,7 +145,7 @@ export default function Home() {
           animate={{z:1, y: 0 }} 
           layout 
           transition={{ type: "tween", duration: 0.5 }} 
-          className={`bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-2xl p-10 w-full max-w-lg transition-opacity duration-1000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`bg-[radial-gradient(at_right_top,_#CB1111,_#6A2794)] rounded-2xl shadow-lg sm:shadow-2xl p-10 w-full max-w-lg transition-opacity duration-1000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
         >
           <motion.div layout className="flex flex-nowrap justify-center items-center gap-1 mb-10">
             <img src="/svgr.svg" draggable="false" className="select-none sm:w-20 sm:h-20 w-15 h-15" alt="Logo" />
@@ -183,12 +202,12 @@ export default function Home() {
               <motion.div
                 key={key}
 				ref={resultRef}
-                variants={containerVariants}
+                variants={isMobile ? mobileVariants : desktopVariants}
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="font-semibold rounded-lg bg-gray-50 text-center text-lg font-raleway p-3.5"
-                style={{ color: color, transformOrigin: 'bottom' }}
+                className={`font-semibold shadow-lg rounded-lg bg-gray-50 text-center text-lg font-raleway p-3.5 ${isMobile ? 'mt-9' : 'mt-0'}`}
+                style={{ color: color, transformOrigin: 'bottom', willChange: 'transform, opacity' }}
               >
                 <motion.p
                   variants={contentVariants}
